@@ -23,21 +23,20 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Android SDK tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y android-sdk
-          echo "ANDROID_HOME=/usr/lib/android-sdk" >> "$GITHUB_ENV"
-          echo "/usr/lib/android-sdk/platform-tools" >> "$GITHUB_PATH"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: "11076708"
 
-      - name: Build debug APK
+      - name: Install Gradle
         run: |
-          if [ ! -f gradlew ]; then
-            echo "ERROR: gradlew is missing from the project root"
-            exit 1
-          fi
-          chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip
+          echo "$PWD/gradle-8.7/bin" >> "$GITHUB_PATH"
+
+      - name: Build APK
+        run: |
+          gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
